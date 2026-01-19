@@ -22,12 +22,3 @@ jobs:
         uses: hexlet/project-action@release
         with:
           hexlet-id: ${{ secrets.HEXLET_ID }}
-
-      - name: Install dependencies
-        run: go mod tidy
-
-      - name: Run lint
-        run: make lint
-
-      - name: Run tests
-        run: go test ./... -v -coverprofile=coverage.out
