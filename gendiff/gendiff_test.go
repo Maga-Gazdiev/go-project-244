@@ -80,18 +80,18 @@ Property 'group3' was added with value: [complex value]`,
 		},
 	}
 
-		for _, test := range tests {
-			t.Run(test.name, func(t *testing.T) {
-				diff, err := GenDiff(test.file1, test.file2, "plain")
-				if err != nil {
-					t.Fatalf("ошибка: %v", err)
-				}
-				if diff != test.expected {
-					t.Errorf("получено:\n%s\nожидается:\n%s", diff, test.expected)
-				}
-			})
-		}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			diff, err := GenDiff(test.file1, test.file2, "plain")
+			if err != nil {
+				t.Fatalf("ошибка: %v", err)
+			}
+			if diff != test.expected {
+				t.Errorf("получено:\n%s\nожидается:\n%s", diff, test.expected)
+			}
+		})
 	}
+}
 
 func TestGenDiffJson(t *testing.T) {
 	tests := []struct {
