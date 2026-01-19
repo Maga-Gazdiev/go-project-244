@@ -2,7 +2,7 @@ package formatters
 
 import (
 	"encoding/json"
-	"hexlet-project-lvl2/gendiff/model"
+	"code/gendiff/model"
 )
 
 type JsonFormatter struct{}

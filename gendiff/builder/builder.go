@@ -1,7 +1,7 @@
 package builder
 
 import (
-	"hexlet-project-lvl2/gendiff/model"
+	"code/gendiff/model"
 	"sort"
 )
 

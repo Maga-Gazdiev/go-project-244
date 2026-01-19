@@ -1,4 +1,4 @@
-module hexlet-project-lvl2
+module code
 
 go 1.25
 

@@ -1,9 +1,9 @@
 package gendiff
 
 import (
-	"hexlet-project-lvl2/gendiff/builder"
-	"hexlet-project-lvl2/gendiff/formatters"
-	"hexlet-project-lvl2/gendiff/parser"
+	"code/gendiff/builder"
+	"code/gendiff/formatters"
+	"code/gendiff/parser"
 )
 
 func GenDiff(filePath1, filePath2, format string) (string, error) {

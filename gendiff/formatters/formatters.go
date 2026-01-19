@@ -2,7 +2,7 @@ package formatters
 
 import (
 	"fmt"
-	"hexlet-project-lvl2/gendiff/model"
+	"code/gendiff/model"
 )
 
 type Formatter interface {

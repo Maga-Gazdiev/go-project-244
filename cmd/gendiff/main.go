@@ -3,7 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
-	"hexlet-project-lvl2/gendiff"
+	"code/gendiff"
 	"os"
 
 	"github.com/urfave/cli/v3"
