@@ -1,9 +1,9 @@
 package main
 
 import (
+	"code/gendiff"
 	"context"
 	"fmt"
-	"code/gendiff"
 	"os"
 
 	"github.com/urfave/cli/v3"

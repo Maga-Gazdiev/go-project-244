@@ -1,8 +1,8 @@
 package formatters
 
 import (
-	"fmt"
 	"code/gendiff/model"
+	"fmt"
 	"strings"
 )
 
@@ -36,7 +36,6 @@ func formatPlain(diffTree []model.DiffNode, pathPrefix string, result *[]string)
 		case model.StatusNested:
 			formatPlain(node.Children, currentPath, result)
 		case model.StatusUnchanged:
-			// Не выводим неизмененные свойства в plain формате
 		}
 	}
 }
@@ -57,4 +56,3 @@ func formatPlainValue(value any) string {
 		return fmt.Sprintf("%v", v)
 	}
 }
-

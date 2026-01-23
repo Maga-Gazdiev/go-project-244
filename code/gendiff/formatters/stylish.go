@@ -1,8 +1,8 @@
 package formatters
 
 import (
-	"fmt"
 	"code/gendiff/model"
+	"fmt"
 	"sort"
 	"strings"
 )
@@ -22,21 +22,22 @@ func formatDiff(diffTree []model.DiffNode, depth int) []string {
 	for _, v := range diffTree {
 		indent := makeIndent(depth)
 
-		if v.Status == model.StatusAdded {
+		switch v.Status {
+		case model.StatusAdded:
 			result = append(result,
 				fmt.Sprintf("%s+ %s: %s", indent, v.Key, formatValue(v.NewValue, depth+1)))
-		} else if v.Status == model.StatusRemoved {
+		case model.StatusRemoved:
 			result = append(result,
 				fmt.Sprintf("%s- %s: %s", indent, v.Key, formatValue(v.OldValue, depth+1)))
-		} else if v.Status == model.StatusUnchanged {
+		case model.StatusUnchanged:
 			result = append(result,
 				fmt.Sprintf("%s  %s: %s", indent, v.Key, formatValue(v.OldValue, depth+1)))
-		} else if v.Status == model.StatusChanged {
+		case model.StatusChanged:
 			result = append(result,
 				fmt.Sprintf("%s- %s: %s", indent, v.Key, formatValue(v.OldValue, depth+1)),
 				fmt.Sprintf("%s+ %s: %s", indent, v.Key, formatValue(v.NewValue, depth+1)),
 			)
-		} else if v.Status == model.StatusNested {
+		case model.StatusNested:
 			result = append(result, fmt.Sprintf("%s  %s: {", indent, v.Key))
 			result = append(result, formatDiff(v.Children, depth+1)...)
 			result = append(result, fmt.Sprintf("%s  }", indent))
@@ -72,7 +73,5 @@ func formatValue(value any, depth int) string {
 }
 
 func makeIndent(depth int) string {
-	return strings.Repeat(" ", depth*2)
+	return strings.Repeat(" ", depth*4-2)
 }
-
-

@@ -18,7 +18,7 @@ func GenDiff(filePath1, filePath2, format string) (string, error) {
 	}
 
 	diffTree := builder.BuildDiff(data1, data2)
-	
+
 	formatter, err := formatters.GetFormatter(format)
 	if err != nil {
 		return "", err
