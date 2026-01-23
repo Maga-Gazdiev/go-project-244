@@ -12,7 +12,7 @@ import (
 func main() {
 	app := &cli.Command{
 		Name:  "gendiff",
-		Usage: "Test",
+		Usage: "Compares two configuration files and shows a difference.",
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:    "format",
