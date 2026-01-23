@@ -1,8 +1,8 @@
 setup:
-	cd code && go mod tidy
+	go mod tidy
 
 build:
-	cd code && go build -o ../bin/gendiff ./cmd/gendiff
+	go build -o bin/gendiff ./code/cmd/gendiff
 	
 lint:
-	cd code && golangci-lint run ./...
+	golangci-lint run ./code/...

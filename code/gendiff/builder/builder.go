@@ -1,7 +1,7 @@
 package builder
 
 import (
-	"code/gendiff/model"
+	"code/code/gendiff/model"
 	"sort"
 )
 

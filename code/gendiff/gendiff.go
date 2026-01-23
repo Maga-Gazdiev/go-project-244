@@ -1,9 +1,9 @@
 package gendiff
 
 import (
-	"code/gendiff/builder"
-	"code/gendiff/formatters"
-	"code/gendiff/parser"
+	"code/code/gendiff/builder"
+	"code/code/gendiff/formatters"
+	"code/code/gendiff/parser"
 )
 
 func GenDiff(filePath1, filePath2, format string) (string, error) {

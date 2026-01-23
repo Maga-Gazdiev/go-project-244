@@ -1,7 +1,7 @@
 package formatters
 
 import (
-	"code/gendiff/model"
+	"code/code/gendiff/model"
 	"encoding/json"
 	"fmt"
 )

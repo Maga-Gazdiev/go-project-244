@@ -2,7 +2,7 @@ package formatters
 
 import (
 	"fmt"
-	"code/gendiff/model"
+	"code/code/gendiff/model"
 )
 
 type Formatter interface {
