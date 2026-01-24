@@ -1,6 +1,7 @@
 package gendiff
 
 import (
+	"encoding/json"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -11,7 +12,11 @@ import (
 func getFixturePath(filename string) string {
 	_, testFile, _, _ := runtime.Caller(0)
 	testDir := filepath.Dir(testFile)
-	return filepath.Join(testDir, "..", "fixture", filename)
+	projectRoot := filepath.Clean(filepath.Join(testDir, "..", "..", ".."))
+	if filepath.Base(projectRoot) != "go-project-lvl2" {
+		projectRoot = filepath.Clean(filepath.Join(projectRoot, "go-project-lvl2"))
+	}
+	return filepath.Join(projectRoot, "fixture", filename)
 }
 
 func readExpectedResult(filename string) (string, error) {
@@ -38,134 +43,96 @@ func normalizeString(s string) string {
 	return strings.Join(normalized, "\n")
 }
 
-func TestGenDiff_JSON_Stylish(t *testing.T) {
-	file1 := getFixturePath("file1.json")
-	file2 := getFixturePath("file2.json")
-
-	result, err := GenDiff(file1, file2, "stylish")
-	if err != nil {
-		t.Fatalf("GenDiff вернул ошибку: %v", err)
+func TestGenDiff(t *testing.T) {
+	tests := []struct {
+		name           string
+		file1          string
+		file2          string
+		format         string
+		expectedResult string
+	}{
+		{
+			name:           "JSON with stylish format",
+			file1:          "file1.json",
+			file2:          "file2.json",
+			format:         "stylish",
+			expectedResult: "result_stylish.txt",
+		},
+		{
+			name:           "JSON with plain format",
+			file1:          "file1.json",
+			file2:          "file2.json",
+			format:         "plain",
+			expectedResult: "result_plain.txt",
+		},
+		{
+			name:           "JSON with json format",
+			file1:          "file1.json",
+			file2:          "file2.json",
+			format:         "json",
+			expectedResult: "result_json.json",
+		},
+		{
+			name:           "YAML with stylish format",
+			file1:          "file1.yml",
+			file2:          "file2.yml",
+			format:         "stylish",
+			expectedResult: "result_stylish.txt",
+		},
+		{
+			name:           "YAML with plain format",
+			file1:          "file1.yml",
+			file2:          "file2.yml",
+			format:         "plain",
+			expectedResult: "result_plain.txt",
+		},
+		{
+			name:           "YAML with json format",
+			file1:          "file1.yml",
+			file2:          "file2.yml",
+			format:         "json",
+			expectedResult: "result_json.json",
+		},
 	}
 
-	expected, err := readExpectedResult("result_stylish.txt")
-	if err != nil {
-		t.Fatalf("Не удалось прочитать ожидаемый результат: %v", err)
-	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			file1 := getFixturePath(tt.file1)
+			file2 := getFixturePath(tt.file2)
 
-	normalizedResult := normalizeString(result)
-	normalizedExpected := normalizeString(expected)
+			result, err := GenDiff(file1, file2, tt.format)
+			if err != nil {
+				t.Fatalf("GenDiff вернул ошибку: %v", err)
+			}
 
-	if normalizedResult != normalizedExpected {
-		t.Errorf("Результат не совпадает с ожидаемым.\nПолучено:\n%s\n\nОжидалось:\n%s", result, expected)
-	}
-}
+			expected, err := readExpectedResult(tt.expectedResult)
+			if err != nil {
+				t.Fatalf("Не удалось прочитать ожидаемый результат: %v", err)
+			}
 
-func TestGenDiff_JSON_Plain(t *testing.T) {
-	file1 := getFixturePath("file1.json")
-	file2 := getFixturePath("file2.json")
+			if tt.format == "json" {
+				var resultJSON, expectedJSON interface{}
+				if err := json.Unmarshal([]byte(result), &resultJSON); err != nil {
+					t.Fatalf("Не удалось распарсить результат как JSON: %v", err)
+				}
+				if err := json.Unmarshal([]byte(expected), &expectedJSON); err != nil {
+					t.Fatalf("Не удалось распарсить ожидаемый результат как JSON: %v", err)
+				}
 
-	result, err := GenDiff(file1, file2, "plain")
-	if err != nil {
-		t.Fatalf("GenDiff вернул ошибку: %v", err)
-	}
+				resultBytes, _ := json.Marshal(resultJSON)
+				expectedBytes, _ := json.Marshal(expectedJSON)
 
-	expected, err := readExpectedResult("result_plain.txt")
-	if err != nil {
-		t.Fatalf("Не удалось прочитать ожидаемый результат: %v", err)
-	}
+				if string(resultBytes) != string(expectedBytes) {
+					t.Errorf("Результат не совпадает с ожидаемым.\nПолучено:\n%s\n\nОжидалось:\n%s", result, expected)
+				}
+			} else {
+				normalizedResult := normalizeString(result)
+				normalizedExpected := normalizeString(expected)
 
-	normalizedResult := normalizeString(result)
-	normalizedExpected := normalizeString(expected)
-
-	if normalizedResult != normalizedExpected {
-		t.Errorf("Результат не совпадает с ожидаемым.\nПолучено:\n%s\n\nОжидалось:\n%s", result, expected)
-	}
-}
-
-func TestGenDiff_JSON_JSON(t *testing.T) {
-	file1 := getFixturePath("file1.json")
-	file2 := getFixturePath("file2.json")
-
-	result, err := GenDiff(file1, file2, "json")
-	if err != nil {
-		t.Fatalf("GenDiff вернул ошибку: %v", err)
-	}
-
-	expected, err := readExpectedResult("result_json.json")
-	if err != nil {
-		t.Fatalf("Не удалось прочитать ожидаемый результат: %v", err)
-	}
-
-	normalizedResult := normalizeString(result)
-	normalizedExpected := normalizeString(expected)
-
-	if normalizedResult != normalizedExpected {
-		t.Errorf("Результат не совпадает с ожидаемым.\nПолучено:\n%s\n\nОжидалось:\n%s", result, expected)
-	}
-}
-
-func TestGenDiff_YAML_Stylish(t *testing.T) {
-	file1 := getFixturePath("file1.yml")
-	file2 := getFixturePath("file2.yml")
-
-	result, err := GenDiff(file1, file2, "stylish")
-	if err != nil {
-		t.Fatalf("GenDiff вернул ошибку: %v", err)
-	}
-
-	expected, err := readExpectedResult("result_stylish.txt")
-	if err != nil {
-		t.Fatalf("Не удалось прочитать ожидаемый результат: %v", err)
-	}
-
-	normalizedResult := normalizeString(result)
-	normalizedExpected := normalizeString(expected)
-
-	if normalizedResult != normalizedExpected {
-		t.Errorf("Результат не совпадает с ожидаемым.\nПолучено:\n%s\n\nОжидалось:\n%s", result, expected)
-	}
-}
-
-func TestGenDiff_YAML_Plain(t *testing.T) {
-	file1 := getFixturePath("file1.yml")
-	file2 := getFixturePath("file2.yml")
-
-	result, err := GenDiff(file1, file2, "plain")
-	if err != nil {
-		t.Fatalf("GenDiff вернул ошибку: %v", err)
-	}
-
-	expected, err := readExpectedResult("result_plain.txt")
-	if err != nil {
-		t.Fatalf("Не удалось прочитать ожидаемый результат: %v", err)
-	}
-
-	normalizedResult := normalizeString(result)
-	normalizedExpected := normalizeString(expected)
-
-	if normalizedResult != normalizedExpected {
-		t.Errorf("Результат не совпадает с ожидаемым.\nПолучено:\n%s\n\nОжидалось:\n%s", result, expected)
-	}
-}
-
-func TestGenDiff_YAML_JSON(t *testing.T) {
-	file1 := getFixturePath("file1.yml")
-	file2 := getFixturePath("file2.yml")
-
-	result, err := GenDiff(file1, file2, "json")
-	if err != nil {
-		t.Fatalf("GenDiff вернул ошибку: %v", err)
-	}
-
-	expected, err := readExpectedResult("result_json.json")
-	if err != nil {
-		t.Fatalf("Не удалось прочитать ожидаемый результат: %v", err)
-	}
-
-	normalizedResult := normalizeString(result)
-	normalizedExpected := normalizeString(expected)
-
-	if normalizedResult != normalizedExpected {
-		t.Errorf("Результат не совпадает с ожидаемым.\nПолучено:\n%s\n\nОжидалось:\n%s", result, expected)
+				if normalizedResult != normalizedExpected {
+					t.Errorf("Результат не совпадает с ожидаемым.\nПолучено:\n%s\n\nОжидалось:\n%s", result, expected)
+				}
+			}
+		})
 	}
 }

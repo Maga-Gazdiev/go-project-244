@@ -18,7 +18,7 @@
         },
         {
           "key": "setting2",
-          "type": "deleted",
+          "type": "remove",
           "value1": 200
         },
         {
@@ -98,7 +98,7 @@
     },
     {
       "key": "group2",
-      "type": "deleted",
+      "type": "remove",
       "value1": {
         "abc": 12345,
         "deep": {
@@ -155,7 +155,7 @@
             },
             {
               "key": "isNested",
-              "type": "deleted",
+              "type": "remove",
               "value1": true
             }
           ]

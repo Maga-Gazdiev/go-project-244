@@ -1,11 +1,11 @@
 package model
 
 const (
-	StatusAdded    = "added"
-	StatusRemoved  = "remove"
+	StatusAdded     = "added"
+	StatusRemoved   = "remove"
 	StatusUnchanged = "unchanged"
-	StatusChanged  = "changed"
-	StatusNested   = "nested"
+	StatusChanged   = "changed"
+	StatusNested    = "nested"
 )
 
 type DiffNode struct {
@@ -15,8 +15,3 @@ type DiffNode struct {
 	NewValue any
 	Children []DiffNode
 }
-
-
-
-
-

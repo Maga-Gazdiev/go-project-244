@@ -3,73 +3,127 @@ package formatters
 import (
 	"code/code/gendiff/model"
 	"encoding/json"
-	"fmt"
+	"strings"
 )
 
 type JsonFormatter struct{}
 
-type jsonNode struct {
-	Key      string      `json:"key,omitempty"`
-	Type     string      `json:"type,omitempty"`
-	Value1   interface{} `json:"value1,omitempty"`
-	Value2   interface{} `json:"value2,omitempty"`
-	Children []jsonNode  `json:"children,omitempty"`
-}
-
-type jsonRootNode struct {
-	Key      string     `json:"key"`
-	Type     string     `json:"type"`
-	Children []jsonNode `json:"children"`
-}
-
 func (f *JsonFormatter) Format(diffTree []model.DiffNode) string {
-	fmt.Println(diffTree)
-	rootNode := jsonRootNode{
+	rootNode := model.DiffNode{
 		Key:      "",
-		Type:     "root",
-		Children: convertToJsonNodes(diffTree),
+		Status:   "root",
+		Children: diffTree,
 	}
-
-	jsonBytes, err := json.MarshalIndent(rootNode, "", "  ")
+	data := buildJSONData(rootNode)
+	jsonBytes, err := json.Marshal(data)
 	if err != nil {
 		return "{}"
 	}
-
-	return string(jsonBytes)
+	return formatJSON(string(jsonBytes))
 }
 
-func convertToJsonNodes(diffTree []model.DiffNode) []jsonNode {
-	result := make([]jsonNode, 0, len(diffTree))
-	for _, node := range diffTree {
-		jsonNode := jsonNode{
-			Key: node.Key,
-		}
+func buildJSONData(node model.DiffNode) map[string]interface{} {
+	result := make(map[string]interface{})
 
-		switch node.Status {
-		case model.StatusAdded:
-			jsonNode.Type = "added"
-		case model.StatusRemoved:
-			jsonNode.Type = "deleted"
-		case model.StatusUnchanged:
-			jsonNode.Type = "unchanged"
-		case model.StatusChanged:
-			jsonNode.Type = "changed"
-		case model.StatusNested:
-			jsonNode.Type = "nested"
-		}
-
-		if node.Status == model.StatusNested {
-			jsonNode.Children = convertToJsonNodes(node.Children)
-		} else {
-			if node.OldValue != nil {
-				jsonNode.Value1 = node.OldValue
-			}
-			if node.NewValue != nil {
-				jsonNode.Value2 = node.NewValue
-			}
-		}
-
-		result = append(result, jsonNode)
+	if node.Status == "root" {
+		result["key"] = ""
+	} else if node.Key != "" {
+		result["key"] = node.Key
 	}
+
+	var nodeType string
+	switch node.Status {
+	case model.StatusAdded:
+		nodeType = model.StatusAdded
+	case model.StatusRemoved:
+		nodeType = model.StatusRemoved
+	case model.StatusUnchanged:
+		nodeType = model.StatusUnchanged
+	case model.StatusChanged:
+		nodeType = model.StatusChanged
+	case model.StatusNested:
+		nodeType = model.StatusNested
+	case "root":
+		nodeType = "root"
+	}
+	result["type"] = nodeType
+
+	if node.Status == model.StatusNested || node.Status == "root" {
+		children := make([]map[string]interface{}, 0, len(node.Children))
+		for _, child := range node.Children {
+			children = append(children, buildJSONData(child))
+		}
+		result["children"] = children
+	} else {
+		if node.OldValue != nil {
+			result["value1"] = node.OldValue
+		}
+		if node.NewValue != nil {
+			result["value2"] = node.NewValue
+		}
+	}
+
 	return result
+}
+
+func formatJSON(jsonStr string) string {
+	var result strings.Builder
+	indent := 0
+	inString := false
+	escapeNext := false
+
+	for i, char := range jsonStr {
+		if escapeNext {
+			result.WriteRune(char)
+			escapeNext = false
+			continue
+		}
+
+		switch char {
+		case '"':
+			if i > 0 && jsonStr[i-1] != '\\' {
+				inString = !inString
+			}
+			result.WriteRune(char)
+		case '\\':
+			escapeNext = true
+			result.WriteRune(char)
+		case '{', '[':
+			result.WriteRune(char)
+			if !inString {
+				indent++
+				if i+1 < len(jsonStr) && (jsonStr[i+1] != '}' && jsonStr[i+1] != ']') {
+					result.WriteString("\n" + strings.Repeat("  ", indent))
+				}
+			}
+		case '}', ']':
+			if !inString {
+				indent--
+				if i > 0 && jsonStr[i-1] != '{' && jsonStr[i-1] != '[' {
+					result.WriteString("\n" + strings.Repeat("  ", indent))
+				}
+			}
+			result.WriteRune(char)
+		case ',':
+			result.WriteRune(char)
+			if !inString {
+				if i+1 < len(jsonStr) && jsonStr[i+1] != ' ' {
+					result.WriteString("\n" + strings.Repeat("  ", indent))
+				}
+			}
+		case ':':
+			result.WriteRune(char)
+			if !inString && i+1 < len(jsonStr) && jsonStr[i+1] != ' ' {
+				result.WriteRune(' ')
+			}
+		case ' ', '\n', '\t':
+			if inString {
+				result.WriteRune(char)
+			}
+		default:
+			result.WriteRune(char)
+		}
+	}
+
+	return result.String()
 }
