@@ -1,8 +1,8 @@
 package formatters
 
 import (
+	"code/gendiff/model"
 	"fmt"
-	"code/code/gendiff/model"
 )
 
 type Formatter interface {
@@ -21,4 +21,3 @@ func GetFormatter(formatName string) (Formatter, error) {
 		return nil, fmt.Errorf("неподдерживаемый формат: %s", formatName)
 	}
 }
-

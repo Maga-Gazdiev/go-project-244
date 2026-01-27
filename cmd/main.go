@@ -1,7 +1,7 @@
 package main
 
 import (
-	"code/code/gendiff"
+	"code/gendiff"
 	"context"
 	"fmt"
 	"os"

@@ -1,7 +1,7 @@
 package formatters
 
 import (
-	"code/code/gendiff/model"
+	"code/gendiff/model"
 	"fmt"
 	"sort"
 	"strings"

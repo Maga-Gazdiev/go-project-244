@@ -1,7 +1,7 @@
 package builder
 
 import (
-	"code/code/gendiff/model"
+	"code/gendiff/model"
 	"sort"
 )
 
@@ -88,4 +88,3 @@ func collectKeys(data1, data2 map[string]any) []string {
 
 	return result
 }
-

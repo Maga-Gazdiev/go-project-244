@@ -12,11 +12,11 @@ import (
 func getFixturePath(filename string) string {
 	_, testFile, _, _ := runtime.Caller(0)
 	testDir := filepath.Dir(testFile)
-	projectRoot := filepath.Clean(filepath.Join(testDir, "..", "..", ".."))
+	projectRoot := filepath.Clean(filepath.Join(testDir, "..", ".."))
 	if filepath.Base(projectRoot) != "go-project-lvl2" {
 		projectRoot = filepath.Clean(filepath.Join(projectRoot, "go-project-lvl2"))
 	}
-	return filepath.Join(projectRoot, "fixture", filename)
+	return filepath.Join(projectRoot, "testdata", "fixture", filename)
 }
 
 func readExpectedResult(filename string) (string, error) {

@@ -1,7 +1,7 @@
 package formatters
 
 import (
-	"code/code/gendiff/model"
+	"code/gendiff/model"
 	"encoding/json"
 	"strings"
 )
@@ -9,12 +9,12 @@ import (
 type JsonFormatter struct{}
 
 func (f *JsonFormatter) Format(diffTree []model.DiffNode) string {
-	rootNode := model.DiffNode{
+	levelNode := model.DiffNode{
 		Key:      "",
-		Status:   "root",
+		Status:   "level",
 		Children: diffTree,
 	}
-	data := buildJSONData(rootNode)
+	data := buildJSONData(levelNode)
 	jsonBytes, err := json.Marshal(data)
 	if err != nil {
 		return "{}"
@@ -25,7 +25,7 @@ func (f *JsonFormatter) Format(diffTree []model.DiffNode) string {
 func buildJSONData(node model.DiffNode) map[string]interface{} {
 	result := make(map[string]interface{})
 
-	if node.Status == "root" {
+	if node.Status == "level" {
 		result["key"] = ""
 	} else if node.Key != "" {
 		result["key"] = node.Key
@@ -43,12 +43,12 @@ func buildJSONData(node model.DiffNode) map[string]interface{} {
 		nodeType = model.StatusChanged
 	case model.StatusNested:
 		nodeType = model.StatusNested
-	case "root":
-		nodeType = "root"
+	case "level":
+		nodeType = "level"
 	}
 	result["type"] = nodeType
 
-	if node.Status == model.StatusNested || node.Status == "root" {
+	if node.Status == model.StatusNested || node.Status == "level" {
 		children := make([]map[string]interface{}, 0, len(node.Children))
 		for _, child := range node.Children {
 			children = append(children, buildJSONData(child))
